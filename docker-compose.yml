@@ -1,0 +1,44 @@
+version: "3.8" #DEFINE THE VERSION
+
+services: #DEFINE SERVICE PROPERTIES
+  app: #DEFINE SERVICE ENTRY
+    image: node:12-alpine #DEFINE THE IMAGE TO BE USED
+    command: sh -c "yarn install && yarn run dev" #DEFINE THE COMMANDS TO EXECUTE ON START
+    ports:
+      - 3000:3000 #DEFINE THE PORTS IT'LL PULL FROM AND PUSH TO
+    working_dir: /public #Define the working directory for the volume to be mounted
+    volumes:
+      - ./:/public #MOUNT THE CURRENT DIRECTORY INTO THE APP DIRECTORY ON THE CONTAINER
+    environment: #SET ALL THE ENVIRONMENT VARIABLES
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: secret
+      MYSQL_DB: omm
+
+  mysql:  # SETUP THE MYSQL CONTAINER
+    image: mysql:5.7
+    volumes:
+      - omm-mysql-data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: omm
+
+volumes:
+  todo-mysql-data:
+
+#WHEN READY BUILD THE IMAGE BY RUNNING "docker build -t omm ."
+#----------------------------------------------------------------------------------------
+#HERES AN EXAMPLE OF A BUILD STEP TO CREATE THE APPLICATION THEN IT COPIES THE FILES OVER
+#TO THE FINISHED CONTAINER WITHOUT THE UNNEEDED DEPENDENCIES
+#----------------------------------------------------------------------------------------
+#  FROM node:12 AS build
+#  WORKDIR /app
+#  COPY package* yarn.lock ./
+#  RUN yarn install
+#  COPY public ./public
+#  COPY src ./src
+#  RUN yarn run build
+#
+#  FROM nginx:alpine
+#  COPY --from=build /app/build /usr/share/nginx/html
+#-----------------------------------------------------------------------------------------
